@@ -1196,7 +1196,6 @@ void cleanUpGame( struct Game * game )
 	game->dealer = ( game->dealer + 1 ) % game->playersSize;
 }
 
-
 void printGame( struct Game * game )
 {
 	if( table[0] == nullptr )
