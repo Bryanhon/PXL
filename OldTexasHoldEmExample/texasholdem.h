@@ -6,7 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
-//#define nullptr NULL
+#define nullptr NULL
 #define STARTER_CHIPS 128
 #define COMBO_SIZE 7
 #define MAX_PLAYERS_IN_GAME 10
@@ -27,12 +27,12 @@ enum SUIT
 
 enum POKER_HAND
 {
-    HIGH_CARD = 0,
-    ONE_PAIR,
-    TWO_PAIR,
+	HIGH_CARD = 0,
+	ONE_PAIR,
+	TWO_PAIR,
 	THREE_OF_A_KIND,
 	STRAIGHT,
-    FLUSH,
+	FLUSH,
 	FULL_HOUSE,
 	FOUR_OF_A_KIND,
 	STRAIGHT_FLUSH
@@ -98,7 +98,25 @@ int willYouRaise( struct Game * game, struct Player * player, unsigned int total
 
 void printCard( struct Card * card )
 {
+#if defined(_WIN32) || defined(__MSDOS__)
 	printf( " %c", card->suit );
+#else
+	switch( card->suit )
+	{
+	case SPADES:
+		printf( " \u2660" );
+		break;
+	case DIAMONDS:
+		printf( " \u2666" );
+		break;
+	case CLUBS:
+		printf( " \u2663" );
+		break;
+	case HEARTS:
+		printf( " \u2665" );
+		break;
+	}
+#endif
 	switch( card->rank )
 	{
 	case 1:
@@ -141,7 +159,7 @@ int handValue( struct PokerRank pokerHand )
 	int returnValue = 0;
 	for( byte i = 0 ; i < 5 ; i++ )
 	{
-		if( pokerHand.hand[i] == nullptr )
+		if( (Card *) pokerHand.hand[i] == nullptr )
 		{
 			printf( "Something went wrong..." );
 			system( "pause" );
@@ -283,23 +301,23 @@ PokerRank getMyHandRank( struct Hand * hand )
 {
 	//Prepping for help !
 	struct Card * combo[COMBO_SIZE];
-    byte comboSize = 0;
+	byte comboSize = 0;
 	for( byte i = 0 ; i < 2 ; i++ ) //fill
 	{
-        if( hand->cards[i] != nullptr )
-        {
-            comboSize++;
-        }
+		if( hand->cards[i] != nullptr )
+		{
+			comboSize++;
+		}
 		combo[i] = hand->cards[i];
 	}
-    for( byte i = 0 ; i < COMBO_SIZE - 2 ; i++ ) //fill
+	for( byte i = 0 ; i < COMBO_SIZE - 2 ; i++ ) //fill
 	{
-        if( table[i] != nullptr )
+		if( table[i] != nullptr )
 		{
-            comboSize++;
+			comboSize++;
 		}
 		combo[i+2] = table[i];
-    }
+	}
 	for( byte i = 0 ; i < comboSize ; i++ ) //sort
 	{
 		if( combo[i] != nullptr )
@@ -316,57 +334,57 @@ PokerRank getMyHandRank( struct Hand * hand )
 		}
 	}
 
-    PokerRank returnValue;
-    //returnValue.hand = new Card[5];
-    for( byte i = 0 ; i < 5 ; i++ )
-    {
-        returnValue.hand[i] = nullptr;
-    }
+	PokerRank returnValue;
+	//returnValue.hand = new Card[5];
+	for( byte i = 0 ; i < 5 ; i++ )
+	{
+		returnValue.hand[i] = nullptr;
+	}
 
-    returnValue.category = HIGH_CARD;
-    if( comboSize == 0 )
-    {
-        returnValue.rank = 0;
-        return( returnValue );
-    }
-    if( comboSize == 1 )
-    {
-        if( combo[0]->rank == 1 )
-        {
-            returnValue.rank = 14; //Ace
-        }
-        else
-        {
-            returnValue.rank = combo[0]->rank;
-        }
-        returnValue.hand[0] = combo[0];
-        return( returnValue );
-    }
-    if( comboSize == 2 )
-    {
-        if( combo[0]->rank == combo[1]->rank )
-        {
-            returnValue.category = ONE_PAIR;
-        }
-        if( combo[1]->rank == 1 )
-        {
-            returnValue.rank = 14; //Ace
-        }
-        else
-        {
-            returnValue.rank = combo[1]->rank;
-        }
-        returnValue.hand[0] = combo[0];
-        returnValue.hand[1] = combo[1];
-        return( returnValue );
-    }
+	returnValue.category = HIGH_CARD;
+	if( comboSize == 0 )
+	{
+		returnValue.rank = 0;
+		return( returnValue );
+	}
+	if( comboSize == 1 )
+	{
+		if( combo[0]->rank == 1 )
+		{
+			returnValue.rank = 14; //Ace
+		}
+		else
+		{
+			returnValue.rank = combo[0]->rank;
+		}
+		returnValue.hand[0] = combo[0];
+		return( returnValue );
+	}
+	if( comboSize == 2 )
+	{
+		if( combo[0]->rank == combo[1]->rank )
+		{
+			returnValue.category = ONE_PAIR;
+		}
+		if( combo[1]->rank == 1 )
+		{
+			returnValue.rank = 14; //Ace
+		}
+		else
+		{
+			returnValue.rank = combo[0]->rank;
+		}
+		returnValue.hand[0] = combo[0];
+		returnValue.hand[1] = combo[1];
+		return( returnValue );
+	}
 
 	byte suitCount[4] = {0,0,0,0};
 	for( byte i = 0 ; i < comboSize ; i++ )
 	{
 		if( combo[i] != nullptr )
 		{
-            suitCount[combo[i]->suit-0x3]++;
+			suitCount[combo[i]->suit-0x3]++;
 		}
 	}
 
@@ -456,14 +474,14 @@ PokerRank getMyHandRank( struct Hand * hand )
 				return( returnValue );
 			}
 			identicalNumbers++;
-        }
+		}
 		handIndex = 0;
 		returnValue.hand[handIndex] = combo[comboSize - 1];
 		handIndex++;
-        identicalNumbers = 1;
-        returnValue.rank = combo[comboSize - 1]->rank; //start from the last card
+		identicalNumbers = 1;
+		returnValue.rank = combo[comboSize - 1]->rank; //start from the last card
 		for( byte i = comboSize - 2 ; i >= 0 && combo[i]->rank != 1 ; i-- ) //chech all the oher cards for four of the same rank, from high to low
-        {
+		{
 			if( returnValue.rank == combo[i]->rank )
 			{
 				returnValue.hand[handIndex] = combo[i];
@@ -983,7 +1001,7 @@ void bettingInGame( struct Game * game, byte isPreFlop )
 		i = ( i + 1 ) % game->playersSize;
 	}
 	char minimumPlayerCheck = game->playersSize;
-    int raisedBet;
+	int raisedBet;
 	while( ( game->players[i]->bet < game->highestBet ) || ( game->amountHands > 1 && minimumPlayerCheck > 0 ) )
 	{
 		if( minimumPlayerCheck > 0 )
@@ -993,13 +1011,13 @@ void bettingInGame( struct Game * game, byte isPreFlop )
 		if( isHandFilled( game->players[i]->hand ) > 0 && game->players[i]->chips != game->players[i]->bet ) //playing and not all in yet
 		{
 			raisedBet = willYouRaise( game, game->players[i], game->highestBet );
-            if( raisedBet < 0 )
+			if( raisedBet < 0 )
 			{
-                if( game->players[i]->bet < game->highestBet )
-                {
-                    playerFold( game->players[i] );
-                    game->amountHands--;
-                }
+				if( game->players[i]->bet < game->highestBet )
+				{
+					playerFold( game->players[i] );
+					game->amountHands--;
+				}
 			}
 			else
 			{
@@ -1196,6 +1214,7 @@ void cleanUpGame( struct Game * game )
 	game->dealer = ( game->dealer + 1 ) % game->playersSize;
 }
 
+
 void printGame( struct Game * game )
 {
 	if( table[0] == nullptr )
@@ -1240,12 +1259,12 @@ void playGame( struct Game * game, byte winnerAmount )
 	while( game->playersSize > winnerAmount )
 	{
 		plays++;
+		printf( "Play %d (%d)\n--------\n\n", plays, game->blind );
 		if( plays % 32 == 0 ) //4 rounds with 8 players
 		{
-            game->blind *= 2; //double the blind
+			game->blind *= 2; //double the blind
 		}
-        printf( "Play %d (%d)\n--------\n\n", plays, game->blind );
-        shuffleDeckInGame( game );
+		shuffleDeckInGame( game );
 		dealPocketInGame( game );
 #ifdef DEBUG_PRINT
 		printGame( game );
